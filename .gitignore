@@ -6,6 +6,8 @@
 /.pnp
 .pnp.js
 *.glb
+*.ifc
+xml.js
 
 # testing
 /coverage

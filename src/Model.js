@@ -1,7 +1,11 @@
-import React, { useRef } from 'react'
+import React, { useRef, useContext } from 'react'
 import { useFrame } from 'react-three-fiber'
+import AppContext from './AppContext';
 
 function Model(props) {
+
+  const x = useContext(AppContext)
+  // console.log('x3', x)
 
   const ref = useRef()
 
@@ -15,12 +19,15 @@ function Model(props) {
     e.stopPropagation()
     if (e.object) {
       console.log('e', e.object)
+      // console.log('dccc', contextDispatch)
+      // contextDispatch({ type: 'visibility', id: e.object.uuid })
+      // e.object.visible = false
     }
   }
 
   return props.model ? <primitive
     ref={ref}
-    object={props.model.scene}
+    object={props.model}
     position={[0, 0, 0]}
     onClick={handleClick}
   /> : null
