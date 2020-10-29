@@ -1,5 +1,6 @@
 // import logo from './logo.svg';
 
+import * as THREE from 'three';
 import './App.css';
 import Box from './Box';
 import Model from './Model';
@@ -10,37 +11,72 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import AppContext from './AppContext';
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import Ambu from './ambulance.glb'
-import { xml } from './xml'
+import GLBFile from './ussnew.glb'
+// import { xml } from './xml'
 
 import xml2js from 'xml2js'
 
 extend({ OrbitControls })
 
+const testMaterial = new THREE.MeshBasicMaterial( { color: 0xffaa00, wireframe: true } )
+// const testMaterial = new THREE.MeshBasicMaterial( { color: 0xffaa00, transparent: false } )
+
 function App() {
 
   const contextReducer = (state, action) => {
+    
     if (action.type === 'init') {
-      return action.gltf
+      return {
+        ...state,
+        gltf: action.gltf
+      }
     }
     if (action.type === 'visibility') {
-      return state
+      // Avoid crashing viewer if scene not completely loaded yet
+      if (!(state.gltf && state.gltf.scene && state.gltf.scene.getObjectByProperty)) {
+        return state
+      } else {
+        const target = state.gltf.scene.getObjectByProperty("uuid", action.id)
+        console.log('target', target)
+
+        if (state.selectedUuid) {
+          const prev = state.gltf.scene.getObjectByProperty("uuid", state.selectedUuid)
+          prev.material = prev._mat
+        }
+
+        if (target) {
+          state._selectedName = target.title
+          target.material = testMaterial
+        }
+        return {
+          ...state,
+          selectedUuid: target.uuid,
+          selectedName: target.title
+        }
+      }
+    
     }
     else {
       throw new Error();
     }
   }
 
-  function parseXmlToJson() {
-    var parser = new xml2js.Parser();
-    parser.parseString(xml, function (err, result) {
-      console.dir(result);
-    });
+  // function parseXmlToJson() {
+  //   var parser = new xml2js.Parser();
+  //   parser.parseString(xml, function (err, result) {
+  //     console.log("XML: ", result);
+  //   });
+  // }
+
+  // parseXmlToJson()
+
+
+  const initialContext = {
+    gltf: {},
+    _mat: null,
+    selectedUuid: null,
+    _selectedName: null
   }
-
-
-
-  const initialContext = {}
   const [context, contextDispatch] = useReducer(contextReducer, initialContext);
 
   const [model, setModel] = useState(null)
@@ -48,12 +84,13 @@ function App() {
     if (!model) {
       const gltfLoader = new GLTFLoader();
       console.log('Load model!')
-      gltfLoader.load(Ambu, (gltf) => {
+      gltfLoader.load(GLBFile, (gltf) => {
 
         function addSelfAndChildren(node) {
           node.children.map(d => addSelfAndChildren(d))
           node.key = node.uuid
           node.title = node.name
+          node._mat = node.material
         }
         addSelfAndChildren(gltf.scene)
 
@@ -84,20 +121,26 @@ function App() {
 
   return <div className="App" style={{ height: '100vh' }}>
     <AppContext.Provider value={{ context, contextDispatch }} >
-      <Tree model={model} setModel={setModel} />
+      {/* <Tree model={model} setModel={setModel} /> */}
+      <div style={{position: "absolute", left: 0, top: 0}}>
+        {context._selectedName ? <small>IFC GUID: {context._selectedName}</small> : null}
+      </div>
       <Canvas camera={{
-        fov: 100
+       position: [40, 10, 10]
+        // fov: 90
       }}>
         <CameraControls />
         {/* {cube} */}
 
-        <Model model={context.scene} />
+        <Model model={context.gltf} contextDispatch={contextDispatch} />
 
         <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-        <pointLight position={[-10, -10, -10]} />
-        <Box position={[-1.2, 0, 0]} />
-        <Box position={[1.2, 0, 0]} />
+        <spotLight position={[200, 10, 10]} angle={0.15} penumbra={0.8} distance={500} decay={0}/>
+        <spotLight position={[-100, 10, -10]} angle={0.3} penumbra={0.8} distance={500} decay={0} />
+         {/*
+        <pointLight position={[-0, -10, -10]} />
+        <Box position={[-1.2, 0, 0]} /> */}
+        <Box position={[0, 0, 0]} />
       </Canvas>
     </AppContext.Provider>
   </div>

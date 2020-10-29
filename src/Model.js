@@ -11,24 +11,25 @@ function Model(props) {
 
   useFrame(() => {
     if (ref.current) {
-      ref.current.rotation.x = ref.current.rotation.y += 0.001
+      // ref.current.rotation.x = ref.current.rotation.y += 0.001
     }
   })
 
   function handleClick(e) {
     e.stopPropagation()
     if (e.object) {
-      console.log('e', e.object)
+      console.log('props', props)
+      // console.log('e', e.object)
       // console.log('dccc', contextDispatch)
-      // contextDispatch({ type: 'visibility', id: e.object.uuid })
+      props.contextDispatch({ type: 'visibility', id: e.object.uuid })
       // e.object.visible = false
     }
   }
 
   return props.model ? <primitive
     ref={ref}
-    object={props.model}
-    position={[0, 0, 0]}
+    object={props.model.scene}
+    position={[-75,-25,40]}
     onClick={handleClick}
   /> : null
 
