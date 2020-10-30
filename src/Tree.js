@@ -21,25 +21,26 @@ function TreeDiv(props) {
     };
 
     const onCheck = (checkedKeys, info) => {
-        // console.log('onCheck', checkedKeys, info);
+        console.log('onCheck', checkedKeys, info);
         // console.log('node', info.node)
         // info.node.visible = false
-        contextDispatch({ type: 'visibility', id: info.node.uuid })
+        
+        contextDispatch({ type: 'check', checkedKeys: checkedKeys })
     };
 
-    return !props.model ? null :
-        <div style={{ position: "absolute", left: 0, top: 0, zIndex: 2 }}>
+    return !props.tree ? null :
+        <div style={{ position: "relative", left: 0, top: 0 }}>
             {
-                props.model && props.model.scene.children.length ?
+                props.tree && props.tree ?
                     <Tree
                         checkable
                         // defaultExpandedKeys={['0-0-0', '0-0-1']}
                         // defaultSelectedKeys={['0-0-0', '0-0-1']}
                         // defaultCheckedKeys={['0-0-0', '0-0-1']}
                         onSelect={onSelect}
-                        // defaultExpandAll={true}
+                        defaultExpandAll={false}
                         onCheck={onCheck}
-                        treeData={props.model.scene.children}>
+                        treeData={props.tree}>
 
                     </Tree>
                     :

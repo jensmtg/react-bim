@@ -1,11 +1,7 @@
-import React, { useRef, useContext } from 'react'
+import React, { useRef } from 'react'
 import { useFrame } from 'react-three-fiber'
-import AppContext from './AppContext';
 
 function Model(props) {
-
-  const x = useContext(AppContext)
-  // console.log('x3', x)
 
   const ref = useRef()
 
@@ -18,11 +14,8 @@ function Model(props) {
   function handleClick(e) {
     e.stopPropagation()
     if (e.object) {
-      console.log('props', props)
-      // console.log('e', e.object)
-      // console.log('dccc', contextDispatch)
-      props.contextDispatch({ type: 'visibility', id: e.object.uuid })
-      // e.object.visible = false
+      // console.log('props', props)
+      props.contextDispatch({ type: 'selectInViewer', id: e.object.uuid })
     }
   }
 
